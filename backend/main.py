@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes import auth, vendors, rfq, quotations, approvals, purchase_orders, invoices, activity_logs
 
+from database import engine
+import models
+
 app = FastAPI(title="VendorBridge API")
 
 app.add_middleware(
@@ -24,3 +27,6 @@ app.include_router(activity_logs.router, prefix="/activity-logs", tags=["Activit
 @app.get("/")
 def root():
     return {"message": "VendorBridge API is running"}
+
+
+models.Base.metadata.create_all(bind=engine)
