@@ -21,14 +21,12 @@ app.use(morgan('dev'));
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5000, // Increased limit to prevent 429 errors during testing/hackathon
+  max: 5000, 
 });
 app.use('/api', limiter);
 
-// Routes
 app.use('/api/v1', routes);
 
-// Error Handling
 app.use(errorHandler);
 
 const startServer = async () => {

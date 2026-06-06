@@ -8,7 +8,6 @@ export class ApprovalService {
     const existing = await Approval.findOne({ rfqId: data.rfqId, status: { $in: ['PENDING', 'APPROVED'] } });
     if (existing) throw new AppError('Active approval already exists', 400, 'APPROVAL_EXISTS');
 
-    // Resolve 'auto-select' or invalid IDs to a manager/admin
     if (data.levels && Array.isArray(data.levels)) {
       for (const level of data.levels) {
         if (level.approverId === 'auto-select' || !mongoose.Types.ObjectId.isValid(level.approverId)) {
@@ -37,7 +36,6 @@ export class ApprovalService {
 
     await approval.save();
 
-    // Update RFQ with selected quotation
     await RFQ.findByIdAndUpdate(data.rfqId, {
       selectedQuotationId: data.quotationId,
       approvalId: approval._id,

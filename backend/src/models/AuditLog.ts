@@ -9,7 +9,6 @@ export interface IAuditLog extends Document {
   metadata?: Record<string, unknown>;
 }
 
-// Write-once, no updates, no deletes
 const AuditLogSchema = new Schema<IAuditLog>({
   actorId: { type: Schema.Types.ObjectId, ref: 'User' },
   action: { type: String, required: true },
@@ -19,7 +18,6 @@ const AuditLogSchema = new Schema<IAuditLog>({
   metadata: { type: Schema.Types.Mixed, immutable: true },
 });
 
-// Enforce Immutability at Document Level
 AuditLogSchema.pre('save', function (next) {
   if (process.env.SKIP_IMMUTABILITY_PRE_HOOKS === 'true') return next();
   if (!this.isNew) {
@@ -28,7 +26,6 @@ AuditLogSchema.pre('save', function (next) {
   next();
 });
 
-// Enforce Immutability at Query Level
 const preventUpdate = function (this: any, next: any) {
   if (process.env.SKIP_IMMUTABILITY_PRE_HOOKS === 'true') return next();
   next(new Error('Audit logs are immutable and cannot be updated.'));
@@ -38,7 +35,6 @@ AuditLogSchema.pre('updateOne', preventUpdate);
 AuditLogSchema.pre('updateMany', preventUpdate);
 AuditLogSchema.pre('replaceOne', preventUpdate);
 
-// Enforce no-deletes
 const preventDelete = function (this: any, next: any) {
   if (process.env.SKIP_IMMUTABILITY_PRE_HOOKS === 'true') return next();
   next(new Error('Audit logs are immutable and cannot be deleted.'));

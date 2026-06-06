@@ -18,8 +18,7 @@ export class AuditService {
       });
     } catch (error) {
       console.error('Failed to write audit log:', error);
-      // We don't throw here to avoid failing the main business transaction just because logging failed,
-      // though in a strict system we might want to fail the transaction.
+
     }
   }
 

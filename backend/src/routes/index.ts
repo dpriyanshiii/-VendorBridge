@@ -14,8 +14,6 @@ import { authMiddleware } from '../middleware/auth';
 import { requireRole } from '../middleware/rbac';
 import { auditLogger } from '../middleware/auditLogger';
 
-// Note: In a real app we'd split these into separate route files (e.g., auth.routes.ts)
-// but for the hackathon MVP, we can combine them here for speed.
 
 const router = Router();
 
