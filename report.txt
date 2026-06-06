@@ -1,0 +1,344 @@
+================================================================================
+VENDORBRIDGE — PROCUREMENT & VENDOR MANAGEMENT ERP
+PROJECT REPORT
+================================================================================
+
+PROJECT OVERVIEW
+----------------
+VendorBridge is a full-stack Procurement & Vendor Management ERP system built
+to digitize and streamline procurement operations. It covers the complete
+procurement lifecycle: vendor registration, RFQ creation, quotation submission,
+quotation comparison, approval workflows, purchase order generation, and invoice
+management.
+
+--------------------------------------------------------------------------------
+TECH STACK
+--------------------------------------------------------------------------------
+
+Frontend:
+  - React (TypeScript) with Vite
+  - Lucide React (icons)
+  - React Router (client-side routing)
+  - Zustand (auth state management via authStore)
+  - Axios (API client via apiClient)
+  - React Hot Toast (notifications)
+
+Backend:
+  - Node.js + TypeScript
+  - Express.js (REST API framework)
+  - Mongoose + MongoDB (database ORM and storage)
+  - JSON Web Tokens / JWT (authentication)
+  - bcryptjs (password hashing)
+  - Helmet, CORS, Morgan (security and logging middleware)
+  - Winston (structured logging)
+  - Nodemailer (email delivery)
+  - Puppeteer (PDF generation for invoices)
+  - Zod (input validation)
+  - express-rate-limit (API rate limiting)
+  - node-cron (scheduled tasks)
+
+Database:
+  - MongoDB (primary database)
+  - MySQL (schema designed and tables created as reference/fallback)
+
+Version Control:
+  - Git with GitHub
+  - Multiple branches used (routes, frontend, main)
+  - All members committed independently
+
+--------------------------------------------------------------------------------
+PROJECT STRUCTURE
+--------------------------------------------------------------------------------
+
+odoo-xdevvv/
+├── backend/
+│   ├── src/
+│   │   ├── server.ts               — Express app entry point
+│   │   ├── config/
+│   │   │   ├── db.ts               — MongoDB connection
+│   │   │   └── env.ts              — Environment config
+│   │   ├── controllers/            — Request handlers (thin layer)
+│   │   │   ├── AuthController.ts
+│   │   │   ├── VendorController.ts
+│   │   │   ├── RFQController.ts
+│   │   │   ├── QuotationController.ts
+│   │   │   ├── ComparisonController.ts
+│   │   │   ├── ApprovalController.ts
+│   │   │   ├── POController.ts
+│   │   │   ├── InvoiceController.ts
+│   │   │   ├── NotificationController.ts
+│   │   │   ├── ReportsController.ts
+│   │   │   └── AuditController.ts
+│   │   ├── services/               — Business logic layer
+│   │   │   ├── AuthService.ts
+│   │   │   ├── VendorService.ts
+│   │   │   ├── RFQService.ts
+│   │   │   ├── QuotationService.ts
+│   │   │   ├── ComparisonService.ts
+│   │   │   ├── ApprovalService.ts
+│   │   │   ├── POService.ts
+│   │   │   ├── InvoiceService.ts
+│   │   │   ├── NotificationService.ts
+│   │   │   ├── ReportsService.ts
+│   │   │   └── AuditService.ts
+│   │   ├── models/                 — Mongoose data models
+│   │   │   ├── User.ts
+│   │   │   ├── Vendor.ts
+│   │   │   ├── RFQ.ts
+│   │   │   ├── Quotation.ts
+│   │   │   ├── QuotationComparison.ts
+│   │   │   ├── Approval.ts
+│   │   │   ├── PurchaseOrder.ts
+│   │   │   ├── Invoice.ts
+│   │   │   ├── Notification.ts
+│   │   │   ├── AuditLog.ts
+│   │   │   └── RefreshToken.ts
+│   │   ├── middleware/
+│   │   │   ├── auth.ts             — JWT verification
+│   │   │   ├── rbac.ts             — Role-based access control
+│   │   │   ├── auditLogger.ts      — Automatic audit trail logging
+│   │   │   ├── errorHandler.ts     — Global error handler
+│   │   │   └── validate.ts         — Zod input validation
+│   │   ├── routes/
+│   │   │   └── index.ts            — All API routes in one file
+│   │   ├── services/
+│   │   └── seed/
+│   │       └── seed.ts             — Database seeding script
+│   ├── .env
+│   ├── package.json
+│   └── tsconfig.json
+│
+└── frontend/
+    ├── src/
+    │   ├── api/
+    │   │   └── client.ts           — Axios instance with auth headers
+    │   ├── components/             — Reusable UI components
+    │   │   ├── Badge.tsx
+    │   │   ├── Button.tsx
+    │   │   ├── Card.tsx
+    │   │   ├── Input.tsx
+    │   │   └── Table.tsx
+    │   ├── layouts/
+    │   │   ├── AppLayout.tsx
+    │   │   ├── AuthLayout.tsx
+    │   │   ├── Sidebar.tsx
+    │   │   └── TopBar.tsx
+    │   ├── modules/                — Feature pages
+    │   │   ├── auth/               Login.tsx, Register.tsx
+    │   │   ├── dashboard/          Dashboard.tsx
+    │   │   ├── vendors/            VendorList, VendorDetail, VendorCreate
+    │   │   ├── rfqs/               RFQList, RFQCreate, QuotationSubmit,
+    │   │   │                       QuotationComparison
+    │   │   ├── approvals/          ApprovalList, ApprovalDetail
+    │   │   ├── purchaseOrders/     POList
+    │   │   ├── invoices/           InvoiceList, InvoiceDetail
+    │   │   ├── activity/           ActivityLog
+    │   │   ├── reports/            Reports
+    │   │   └── settings/           Settings
+    │   ├── store/
+    │   │   └── authStore.ts        — Zustand auth state
+    │   ├── router/
+    │   │   └── index.tsx           — React Router routes
+    │   ├── types/
+    │   │   └── index.ts            — TypeScript type definitions
+    │   └── utils/
+    │       └── helpers.ts          — formatDate, formatCurrency etc.
+    ├── package.json
+    └── vite.config.ts
+
+--------------------------------------------------------------------------------
+API ENDPOINTS
+--------------------------------------------------------------------------------
+
+Base URL: http://localhost:5001/api/v1
+
+Auth:
+  POST   /auth/signup               — Register new user
+  POST   /auth/login                — Login, returns JWT
+  GET    /auth/me                   — Get current user (protected)
+
+Vendors:
+  POST   /vendors                   — Create vendor (Admin/PO)
+  GET    /vendors                   — List all vendors
+  GET    /vendors/:id               — Get vendor by ID
+  PATCH  /vendors/:id               — Update vendor (Admin/PO)
+
+RFQs:
+  POST   /rfqs                      — Create RFQ (Admin/PO)
+  POST   /rfqs/:id/publish          — Publish RFQ to vendors
+  GET    /rfqs                      — List RFQs (role-filtered)
+  GET    /rfqs/:id                  — Get RFQ detail
+
+Quotations:
+  POST   /rfqs/:rfqId/quotations    — Submit quotation (Vendor only)
+  GET    /rfqs/:rfqId/quotations    — Get quotations for an RFQ
+
+Comparisons:
+  POST   /rfqs/:rfqId/comparisons   — Create comparison (Admin/PO)
+  GET    /rfqs/:rfqId/comparisons/latest — Get latest comparison
+
+Approvals:
+  POST   /approvals                 — Create approval request (Admin/PO)
+  POST   /approvals/:id/act         — Approve or reject (Manager/Admin)
+  GET    /approvals                 — List all approvals
+  GET    /approvals/:id             — Get approval detail
+
+Purchase Orders:
+  POST   /purchase-orders           — Generate PO from approval (Admin/PO)
+  PATCH  /purchase-orders/:id/status — Update PO status
+  GET    /purchase-orders           — List all POs
+  GET    /purchase-orders/:id       — Get PO detail
+
+Invoices:
+  POST   /invoices                  — Generate invoice from PO
+  PATCH  /invoices/:id/status       — Update invoice status (Admin/Manager)
+  GET    /invoices                  — List all invoices
+  GET    /invoices/:id              — Get invoice detail
+
+Notifications:
+  GET    /notifications             — Get user notifications
+  PATCH  /notifications/:id/read    — Mark one as read
+  PATCH  /notifications/mark-all-read — Mark all as read
+
+Reports:
+  GET    /reports/overview          — Procurement overview metrics
+
+Audit Logs:
+  GET    /audit-logs                — Full audit trail (Admin/Manager/PO)
+
+--------------------------------------------------------------------------------
+USER ROLES & PERMISSIONS
+--------------------------------------------------------------------------------
+
+ADMIN
+  - Full access to all modules
+  - Manage users and vendors
+  - View analytics and audit logs
+
+PROCUREMENT_OFFICER
+  - Create and manage RFQs
+  - Compare quotations
+  - Generate purchase orders and invoices
+  - View reports
+
+MANAGER
+  - Approve or reject quotations
+  - Monitor procurement workflows
+  - View reports and audit logs
+
+VENDOR
+  - Submit quotations on open RFQs
+  - View their own purchase orders
+  - Cannot access internal procurement screens
+
+--------------------------------------------------------------------------------
+KEY FEATURES IMPLEMENTED
+--------------------------------------------------------------------------------
+
+1. Authentication & Authorization
+   - JWT-based login and signup
+   - Role-based access control (RBAC) on every protected route
+   - Middleware-level enforcement (auth.ts + rbac.ts)
+
+2. Vendor Management
+   - Full CRUD for vendor records
+   - Status tracking (active / inactive / blacklisted)
+   - GST number, category, contact details
+
+3. RFQ Module
+   - Create RFQs with line items and deadlines
+   - Publish RFQs to invite vendors
+   - Role-filtered views (vendors only see open RFQs)
+
+4. Quotation Submission & Comparison
+   - Vendors submit quotations against RFQs
+   - Side-by-side comparison screen
+   - Lowest price highlighting
+
+5. Approval Workflow
+   - Multi-level approval chain (L1, L2)
+   - Approve / reject with remarks
+   - Status tracking through workflow steps
+
+6. Purchase Order Generation
+   - Auto-generated PO from approved quotation
+   - PO number auto-assigned
+   - Status lifecycle: created → sent → acknowledged → fulfilled
+
+7. Invoice Management
+   - Auto-generated from purchase order
+   - Tax calculation support
+   - Status lifecycle: draft → issued → sent → paid
+   - PDF generation via Puppeteer
+   - Email delivery via Nodemailer
+
+8. Activity Logs & Audit Trail
+   - Every significant action logged automatically
+   - Middleware-level audit logging (auditLogger.ts)
+   - Filterable by entity type (RFQ, Approval, Invoice, Vendor)
+
+9. Notifications
+   - Per-user in-app notification inbox
+   - Mark as read / mark all as read
+
+10. Reports & Analytics
+    - Overview metrics endpoint
+    - Date range filtering support
+
+--------------------------------------------------------------------------------
+DESIGN DECISIONS
+--------------------------------------------------------------------------------
+
+- Controller → Service architecture separates HTTP handling from business logic,
+  making the codebase easier to maintain and test.
+
+- All routes are protected by authMiddleware by default; public routes
+  (signup, login) are explicitly excluded.
+
+- auditLogger middleware automatically logs actions without requiring manual
+  logging in every controller — keeps code DRY.
+
+- RBAC is enforced at the route level using requireRole(), not inside
+  controllers, so permission logic is centralized.
+
+- Frontend uses a shared apiClient (Axios instance) that automatically attaches
+  the JWT token from authStore to every request.
+
+- CSS variables are used throughout the frontend for consistent theming
+  (--bg, --text-primary, --border, --success etc.)
+
+--------------------------------------------------------------------------------
+HOW TO RUN
+--------------------------------------------------------------------------------
+
+Backend:
+  cd backend
+  npm install
+  # Set up .env with MONGODB_URI, JWT_SECRET, PORT=5001
+  npm run dev
+  # Server runs at http://localhost:5001
+
+Frontend:
+  cd frontend
+  npm install
+  npm run dev
+  # App runs at http://localhost:5173
+
+Seed database (optional):
+  cd backend
+  npm run seed
+
+--------------------------------------------------------------------------------
+TEAM & VERSION CONTROL
+--------------------------------------------------------------------------------
+
+Repository: https://github.com/dpriyanshiii/-VendorBridge
+Branching strategy:
+  - Each member worked on a separate branch
+  - Branches: main, routes, frontend (+ others)
+  - All branches merged into main for final submission
+  - Multiple team members have independent commit history
+
+================================================================================
+END OF REPORT
+================================================================================
